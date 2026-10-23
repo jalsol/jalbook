@@ -1,0 +1,45 @@
+build --compilation_mode=opt
+
+# Performance flags for the host the book is built on.
+build --copt=-O3
+build --copt=-march=native
+build --copt=-fomit-frame-pointer
+build --copt=-fno-plt
+build --copt=-fno-semantic-interposition
+build --copt=-fvisibility=hidden
+build --copt=-ffunction-sections
+build --copt=-fdata-sections
+build --copt=-falign-functions=32
+build --copt=-falign-loops=32
+build --copt=-pthread
+build --linkopt=-pthread
+build --linkopt=-Wl,-O2
+build --linkopt=-Wl,--gc-sections
+build --linkopt=-Wl,--as-needed
+
+# GCC LTO needs a linker that understands GCC LTO objects; Bazel defaults to
+# ld.lld, which only understands LLVM bitcode.
+build --copt=-flto=auto
+build --linkopt=-flto=auto
+build --linkopt=-fuse-ld=gold
+
+# Warnings for project sources only; third-party deps aren't ours to fix.
+build --per_file_copt=^jalbook/.*,^tests/.*@-Wall,-Wextra
+
+test --test_output=errors
+
+# ---- configs ---------------------------------------------------------------
+# CI: no LTO (GCC LTO needs gold), and lld (installed in the CI image).
+build:ci --copt=-fno-lto
+build:ci --linkopt=-fno-lto
+build:ci --linkopt=-fuse-ld=lld
+build:ci --per_file_copt=^jalbook/.*,^tests/.*@-Werror
+build:ci --lockfile_mode=error
+
+# bazel test --config=asan //...
+build:asan --copt=-fno-lto --copt=-fsanitize=address --copt=-fno-omit-frame-pointer
+build:asan --linkopt=-fno-lto --linkopt=-fuse-ld=lld --linkopt=-fsanitize=address
+
+# bazel test --config=ubsan //...
+build:ubsan --copt=-fno-lto --copt=-fsanitize=undefined --copt=-fno-sanitize-recover=all
+build:ubsan --linkopt=-fno-lto --linkopt=-fuse-ld=lld --linkopt=-fsanitize=undefined

@@ -1,0 +1,15 @@
+module(
+    name = "jalbook",
+    version = "0.1.0",
+)
+
+bazel_dep(name = "catch2", version = "3.15.1")
+bazel_dep(name = "rules_cc", version = "0.2.27")
+
+# Bazel 9 support is not merged upstream yet; pinned to PR #272.
+bazel_dep(name = "hedron_compile_commands", dev_dependency = True)
+git_override(
+    module_name = "hedron_compile_commands",
+    commit = "6793b6ed724d32597faffebffd6538a03a4fa9a5",
+    remote = "https://github.com/tinted-software/bazel-compile-commands-extractor.git",
+)

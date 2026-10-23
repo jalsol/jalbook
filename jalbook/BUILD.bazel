@@ -1,0 +1,13 @@
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+
+cc_library(
+    name = "jalbook_lib",
+    hdrs = glob(["*.hpp"]),
+    visibility = ["//visibility:public"],
+)
+
+cc_binary(
+    name = "jalbook",
+    srcs = ["main.cpp"],
+    deps = [":jalbook_lib"],
+)
