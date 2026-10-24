@@ -1,8 +1,8 @@
 #pragma once
 
-#include <iostream>
 #include <string_view>
 
+#include "absl/log/log.h"
 #include "csv.h"
 #include "event.hpp"
 #include "spsc_queue.hpp"
@@ -29,7 +29,7 @@ class FeedHandler {
         event.price /= 100;  // LOBSTER multiplies by 10000 while 100 suffices
         while (!queue_->Push(event));
       }
-      std::println(std::cerr, "Event {}: type={}", ++cnt, std::to_underlying(event.event_type));
+      LOG(INFO) << "Event " << ++cnt << ": type=" << std::to_underlying(event.event_type);
     }
 
     event.event_type = EventType::kHalt;

@@ -18,7 +18,7 @@ unstripped binary:
 
 ```sh
 bazel build --config=dbg //jalbook:jalbook
-gdb --args bazel-bin/jalbook/jalbook -i data/<message>.csv
+gdb --args bazel-bin/jalbook/jalbook --input_path data/<message>.csv
 ```
 
 ## Editor / language server

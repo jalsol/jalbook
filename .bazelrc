@@ -8,6 +8,9 @@ build --copt=-fomit-frame-pointer
 build --copt=-fno-plt
 build --copt=-fno-semantic-interposition
 build --copt=-fvisibility=hidden
+# With hidden visibility, shared libs export nothing and LTO/--gc-sections
+# strips them; link Abseil and friends statically.
+build --dynamic_mode=off
 build --copt=-ffunction-sections
 build --copt=-fdata-sections
 build --copt=-falign-functions=32
@@ -57,3 +60,6 @@ build:asan --linkopt=-fno-lto --linkopt=-fuse-ld=lld --linkopt=-fsanitize=addres
 # bazel test --config=ubsan //...
 build:ubsan --copt=-fno-lto --copt=-fsanitize=undefined --copt=-fno-sanitize-recover=all
 build:ubsan --linkopt=-fno-lto --linkopt=-fuse-ld=lld --linkopt=-fsanitize=undefined
+# GCC 16 UBSan trips a constexpr error in Abseil's hash internals; sanitize
+# project code only.
+build:ubsan --per_file_copt=external/abseil-cpp.*@-fno-sanitize=undefined

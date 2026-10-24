@@ -4,14 +4,20 @@ cc_library(
     name = "jalbook_lib",
     hdrs = glob(["*.hpp"]),
     visibility = ["//visibility:public"],
-    deps = ["@fast_cpp_csv_parser//:csv"],
+    deps = [
+        "@abseil-cpp//absl/log:log",
+        "@fast_cpp_csv_parser//:csv",
+    ],
 )
 
 cc_binary(
     name = "jalbook",
-    srcs = ["main.cpp"],
+    srcs = ["jalbook.cpp"],
     deps = [
-      "@cli11//:cli11",
-      ":jalbook_lib",
+        ":jalbook_lib",
+        "@abseil-cpp//absl/flags:flag",
+        "@abseil-cpp//absl/flags:parse",
+        "@abseil-cpp//absl/log:globals",
+        "@abseil-cpp//absl/log:initialize",
     ],
 )
