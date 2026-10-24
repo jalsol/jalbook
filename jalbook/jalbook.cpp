@@ -83,7 +83,7 @@ int main(int argc, char** argv) {
 
   std::thread book_thread([&] {
     auto order_book = std::make_unique<OrderBook>();
-    Event event;
+    Event event{};
 
     do {
       while (!queue.Pop(&event));

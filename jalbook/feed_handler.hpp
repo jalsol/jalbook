@@ -18,7 +18,7 @@ class FeedHandler {
   FeedHandler& operator=(FeedHandler&&) = delete;
 
   void Run() {
-    Event event;
+    Event event{};
     double timestamp;
 
     while (csv_reader_.read_row(timestamp, event.event_type, event.id, event.size, event.price,

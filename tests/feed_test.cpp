@@ -17,7 +17,7 @@ TEST_CASE("FeedHandler converts LOBSTER price and size units") {
   FeedHandler<Event, 8> feed{&queue, "feed_test.csv"};
   feed.Run();
 
-  Event event;
+  Event event{};
   REQUIRE(queue.Pop(&event));
   CHECK(event.event_type == EventType::kAdd);
   CHECK(event.price == 3104);
@@ -58,6 +58,7 @@ TEST_CASE("OrderBook reduces sizes on cancel and execute") {
   auto submit = [&](std::uint64_t id, std::uint64_t size) {
     book->HandleEvent(Event{
         .event_type = EventType::kAdd,
+        .direction = Direction::kBuy,
         .id = id,
         .size = size,
         .price = 100,
