@@ -20,3 +20,9 @@ bazel run @hedron_compile_commands//:refresh_all
 ```
 
 The file is gitignored. Rerun after changing a `BUILD.bazel`.
+
+## TODO
+- HdrHistogram
+- LOBSTER csv reader from scratch (?)
+- Push/pop backoff(?)
+- Logging from scratch
