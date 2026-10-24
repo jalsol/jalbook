@@ -4,10 +4,14 @@ cc_library(
     name = "jalbook_lib",
     hdrs = glob(["*.hpp"]),
     visibility = ["//visibility:public"],
+    deps = ["@fast_cpp_csv_parser//:csv"],
 )
 
 cc_binary(
     name = "jalbook",
     srcs = ["main.cpp"],
-    deps = [":jalbook_lib"],
+    deps = [
+      "@cli11//:cli11",
+      ":jalbook_lib",
+    ],
 )

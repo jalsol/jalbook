@@ -5,6 +5,27 @@ module(
 
 bazel_dep(name = "catch2", version = "3.15.1")
 bazel_dep(name = "rules_cc", version = "0.2.27")
+bazel_dep(name = "cli11", version = "2.6.2")
+
+# Header-only, not in BCR: pinned tarball plus a generated BUILD file.
+http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+http_archive(
+    name = "fast_cpp_csv_parser",
+    url = "https://github.com/ben-strasser/fast-cpp-csv-parser/archive/574a9fe4d323ba63416877a4a5fe59088d37aa34.tar.gz",
+    sha256 = "b43696c26ff9fe02629109daa9059dd208fdff1002fa2b2e5860a31570c35ca1",
+    strip_prefix = "fast-cpp-csv-parser-574a9fe4d323ba63416877a4a5fe59088d37aa34",
+    build_file_content = """\
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+cc_library(
+    name = "csv",
+    hdrs = ["csv.h"],
+    includes = ["."],
+    visibility = ["//visibility:public"],
+)
+""",
+)
 
 # Bazel 9 support is not merged upstream yet; pinned to PR #272.
 bazel_dep(name = "hedron_compile_commands", dev_dependency = True)
