@@ -2,6 +2,7 @@
 #include <thread>
 
 #include "feed_handler.hpp"
+#include "spsc_queue.hpp"
 #include "utils.hpp"
 
 int main(int argc, char** argv) {
@@ -14,17 +15,19 @@ int main(int argc, char** argv) {
   CLI11_PARSE(app, argc, argv);
 
   // TODO:
-  // - init a spsc queue
-  // - bind feed to input_path and queue
   // - bind book processing to queue
 
-  FeedHandler feed_handler{input_path};
+  SPSCQueue<Order, 1LL << 16> queue;
+  FeedHandler feed_handler{&queue, input_path};
 
   std::thread feed_thread([&] { feed_handler.Run(); });
   threads::PinToCpu(&feed_thread, 1);
 
   std::thread book_thread([&] {
-    // TODO: continuously get data from queue
+    Order order;
+    do {
+      while (!queue.Pop(&order));
+    } while (order.event_type != EventType::kHalt);
   });
   threads::PinToCpu(&book_thread, 2);
 

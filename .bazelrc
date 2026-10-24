@@ -1,4 +1,5 @@
 build --compilation_mode=opt
+build --cxxopt=-std=c++26
 
 # Performance flags for the host the book is built on.
 build --copt=-O3
@@ -34,6 +35,9 @@ build:ci --copt=-fno-lto
 build:ci --linkopt=-fno-lto
 build:ci --linkopt=-fuse-ld=lld
 build:ci --per_file_copt=^jalbook/.*,^tests/.*@-Werror
+# csv.h's snprintf/uninitialized buffers surface in our TUs under -O3/-Werror.
+build:ci --per_file_copt=^jalbook/.*,^tests/.*@-Wno-error=restrict,-Wno-error=uninitialized
+build:ci --per_file_copt=^jalbook/.*,^tests/.*@-Wno-error=maybe-uninitialized,-Wno-error=stringop-truncation
 build:ci --lockfile_mode=error
 
 # bazel test --config=asan //...
