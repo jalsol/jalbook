@@ -30,6 +30,16 @@ build --per_file_copt=^jalbook/.*,^tests/.*@-Wall,-Wextra
 test --test_output=errors
 
 # ---- configs ---------------------------------------------------------------
+# bazel build --config=dbg //jalbook:jalbook   -- for gdb, no LTO
+build:dbg --compilation_mode=dbg
+build:dbg --copt=-O0
+build:dbg --copt=-g3
+build:dbg --copt=-fno-omit-frame-pointer
+build:dbg --copt=-fno-lto
+build:dbg --linkopt=-fno-lto
+build:dbg --linkopt=-fuse-ld=lld
+build:dbg --strip=never
+
 # CI: no LTO (GCC LTO needs gold), and lld (installed in the CI image).
 build:ci --copt=-fno-lto
 build:ci --linkopt=-fno-lto

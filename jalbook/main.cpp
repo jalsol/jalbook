@@ -2,6 +2,7 @@
 #include <thread>
 
 #include "feed_handler.hpp"
+#include "order_book.hpp"
 #include "spsc_queue.hpp"
 #include "utils.hpp"
 
@@ -17,17 +18,20 @@ int main(int argc, char** argv) {
   // TODO:
   // - bind book processing to queue
 
-  SPSCQueue<Order, 1LL << 16> queue;
+  SPSCQueue<Event, 1LL << 16> queue;
   FeedHandler feed_handler{&queue, input_path};
 
   std::thread feed_thread([&] { feed_handler.Run(); });
   threads::PinToCpu(&feed_thread, 1);
 
   std::thread book_thread([&] {
-    Order order;
+    auto order_book = std::make_unique<OrderBook>();
+    Event event;
+
     do {
-      while (!queue.Pop(&order));
-    } while (order.event_type != EventType::kHalt);
+      while (!queue.Pop(&event));
+      order_book->HandleEvent(event);
+    } while (event.event_type != EventType::kHalt);
   });
   threads::PinToCpu(&book_thread, 2);
 

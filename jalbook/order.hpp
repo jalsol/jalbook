@@ -2,46 +2,32 @@
 
 #include <cstdint>
 
-#include "csv.h"
-
-enum class EventType {
-  kAdd = 1,
-  kCancel = 2,
-  kDelete = 3,
-  KExecute = 4,
-  // KHidden
-  // kTrade
-  kHalt = 7,
-};
-
-enum class Direction {
-  kSell = -1,
-  kBuy = 1,
-};
+class Level;  // forward-declare
 
 struct Order {
-  EventType event_type;
   std::uint64_t id;
   std::uint64_t size;
-  std::uint64_t price;
-  Direction direction;
+  Level* level;
+
+  Order* next = nullptr;
+  Order* prev = nullptr;
 };
 
-// exploit fast-csv-cpp-reader internal to read enum class
-namespace io::detail {
+class Level {
+ public:
+  Level() { sentinel_.next = sentinel_.prev = &sentinel_; }
 
-template <>
-inline void parse<io::throw_on_overflow, EventType>(char* col, EventType& value) {
-  int raw;
-  parse<io::throw_on_overflow>(col, raw);
-  value = static_cast<EventType>(raw);
-}
+  Order*& Tail() { return sentinel_.prev; }
+  Order*& Head() { return sentinel_.next; }
 
-template <>
-inline void parse<io::throw_on_overflow, Direction>(char* col, Direction& value) {
-  int raw;
-  parse<io::throw_on_overflow>(col, raw);
-  value = static_cast<Direction>(raw);
-}
+  void AddOrder(Order* order) {
+    order->prev = Tail();
+    order->next = &sentinel_;
 
-}  // namespace io::detail
+    Tail()->next = order;
+    Tail() = order;
+  }
+
+ private:
+  Order sentinel_{};
+};

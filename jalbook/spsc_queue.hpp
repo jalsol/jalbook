@@ -15,8 +15,8 @@ class SPSCQueue {
   SPSCQueue() = default;
   SPSCQueue(const SPSCQueue&) = delete;
   SPSCQueue(SPSCQueue&&) = delete;
-  SPSCQueue operator=(const SPSCQueue&) = delete;
-  SPSCQueue operator=(SPSCQueue&&) = delete;
+  SPSCQueue& operator=(const SPSCQueue&) = delete;
+  SPSCQueue& operator=(SPSCQueue&&) = delete;
 
   bool Push(const T& item) {
     const auto tail = tail_.load(std::memory_order_relaxed);

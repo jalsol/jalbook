@@ -4,7 +4,7 @@
 #include <string_view>
 
 #include "csv.h"
-#include "order.hpp"
+#include "event.hpp"
 #include "spsc_queue.hpp"
 
 template <typename T, std::size_t Size>
@@ -15,27 +15,26 @@ class FeedHandler {
 
   FeedHandler(const FeedHandler&) = delete;
   FeedHandler(FeedHandler&&) = delete;
-  FeedHandler operator=(const FeedHandler&) = delete;
-  FeedHandler operator=(FeedHandler&&) = delete;
+  FeedHandler& operator=(const FeedHandler&) = delete;
+  FeedHandler& operator=(FeedHandler&&) = delete;
 
   void Run() {
-    Order order;
+    int cnt = 0;
+    Event event;
     double timestamp;
 
-    int cnt = 0;
-
-    while (csv_reader_.read_row(timestamp, order.event_type, order.id, order.size, order.price,
-                                order.direction)) {
-      if (order.event_type != EventType::kHalt) [[likely]] {
-        while (!queue_->Push(order));
+    while (csv_reader_.read_row(timestamp, event.event_type, event.id, event.size, event.price,
+                                event.direction)) {
+      if (event.IsBookRelevant()) {
+        event.price /= 100;  // LOBSTER multiplies by 10000 while 100 suffices
+        while (!queue_->Push(event));
       }
-
-      std::println(std::cerr, "Event {}: type={}", ++cnt, std::to_underlying(order.event_type));
+      std::println(std::cerr, "Event {}: type={}", ++cnt, std::to_underlying(event.event_type));
     }
 
-    order.event_type = EventType::kHalt;
-    order.direction = Direction::kSell;
-    while (!queue_->Push(order));
+    event.event_type = EventType::kHalt;
+    event.direction = Direction::kSell;
+    while (!queue_->Push(event));
   }
 
  private:
