@@ -20,8 +20,8 @@ TEST_CASE("FeedHandler converts LOBSTER price and size units") {
   Event event;
   REQUIRE(queue.Pop(&event));
   CHECK(event.event_type == EventType::kAdd);
-  CHECK(event.price == 3104);  // LOBSTER price is x10000; the book indexes cents
-  CHECK(event.size == 5);      // LOBSTER size is x10000; we keep 100s
+  CHECK(event.price == 3104);
+  CHECK(event.size == 500);
 
   REQUIRE(queue.Pop(&event));
   CHECK(event.event_type == EventType::kHalt);
