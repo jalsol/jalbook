@@ -7,8 +7,31 @@ bazel_dep(name = "catch2", version = "3.15.1")
 bazel_dep(name = "rules_cc", version = "0.2.27")
 bazel_dep(name = "abseil-cpp", version = "20260817.0")
 
-# Header-only, not in BCR: pinned tarball plus a generated BUILD file.
+# Pinned tarballs with generated BUILD files.
 http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+# Core histogram only: no logging, zlib or threads. BCR's 0.11.9 BUILD file
+# predates Bazel 9's removal of native cc_library.
+http_archive(
+    name = "hdrhistogram_c",
+    url = "https://github.com/HdrHistogram/HdrHistogram_c/archive/refs/tags/0.12.1.tar.gz",
+    sha256 = "b2cff564b49f900e7f951c95428100a4aed36561703237ffc5e41b4843d804ce",
+    strip_prefix = "HdrHistogram_c-0.12.1",
+    build_file_content = """\
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+cc_library(
+    name = "hdr_histogram",
+    srcs = ["src/hdr_histogram.c"] + glob(["src/*.h"]),
+    hdrs = ["include/hdr/hdr_histogram.h"],
+    includes = ["include"],
+    # Bazel's GCC link action does not pull __cpu_model from libgcc.
+    copts = ["-std=gnu99", "-Wno-error", "-DHDR_DISABLE_AVX2"],
+    linkopts = ["-lm"],
+    visibility = ["//visibility:public"],
+)
+""",
+)
 
 http_archive(
     name = "fast_cpp_csv_parser",

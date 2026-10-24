@@ -20,5 +20,6 @@ cc_binary(
         "@abseil-cpp//absl/flags:parse",
         "@abseil-cpp//absl/log:globals",
         "@abseil-cpp//absl/log:initialize",
+        "@hdrhistogram_c//:hdr_histogram",
     ],
 )

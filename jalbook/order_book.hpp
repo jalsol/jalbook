@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cassert>
+#include <cstddef>
 
 #include "absl/container/flat_hash_map.h"
 #include "event.hpp"
@@ -8,6 +9,11 @@
 
 class OrderBook {
  public:
+  // Avoid rehashing in the hot path; live orders peak in the low thousands.
+  static constexpr std::size_t kReservedOrders = 1 << 14;
+
+  OrderBook() { id_to_order_.reserve(kReservedOrders); }
+
   void HandleEvent(const Event& event) {
     switch (event.event_type) {
       case EventType::kAdd:

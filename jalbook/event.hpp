@@ -4,7 +4,7 @@
 
 #include "csv.h"
 
-enum class EventType {
+enum class EventType : std::uint8_t {
   kAdd = 1,
   kCancel = 2,
   kDelete = 3,
@@ -14,17 +14,17 @@ enum class EventType {
   kHalt = 7,
 };
 
-enum class Direction {
+enum class Direction : std::int8_t {
   kSell = -1,
   kBuy = 1,
 };
 
 struct Event {
   EventType event_type;
+  Direction direction;
   std::uint64_t id;
   std::uint64_t size;
   std::uint64_t price;
-  Direction direction;
 
   bool IsBookRelevant() const {
     return (event_type != EventType::kHidden) && (event_type != EventType::kTrade) &&

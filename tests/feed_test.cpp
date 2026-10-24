@@ -61,7 +61,6 @@ TEST_CASE("OrderBook reduces sizes on cancel and execute") {
         .id = id,
         .size = size,
         .price = 100,
-        .direction = Direction::kBuy,
     });
   };
   submit(1, 100);
@@ -71,37 +70,37 @@ TEST_CASE("OrderBook reduces sizes on cancel and execute") {
 
   book->HandleEvent(Event{
       .event_type = EventType::KExecute,
+      .direction = Direction::kBuy,
       .id = 1,
       .size = 40,
       .price = 100,
-      .direction = Direction::kBuy,
   });
   CHECK(OrderBookTest::Size(*book, 1) == 60);
 
   book->HandleEvent(Event{
       .event_type = EventType::kCancel,
+      .direction = Direction::kBuy,
       .id = 1,
       .size = 20,
       .price = 100,
-      .direction = Direction::kBuy,
   });
   CHECK(OrderBookTest::Size(*book, 1) == 40);
 
   book->HandleEvent(Event{
       .event_type = EventType::kTrade,
+      .direction = Direction::kBuy,
       .id = 1,
       .size = 40,
       .price = 100,
-      .direction = Direction::kBuy,
   });
   CHECK(OrderBookTest::Size(*book, 1) == 40);
 
   book->HandleEvent(Event{
       .event_type = EventType::KExecute,
+      .direction = Direction::kBuy,
       .id = 1,
       .size = 40,
       .price = 100,
-      .direction = Direction::kBuy,
   });
   CHECK_FALSE(OrderBookTest::Contains(*book, 1));
   CHECK(OrderBookTest::Head(*book, 100) == OrderBookTest::At(*book, 2));
@@ -109,10 +108,10 @@ TEST_CASE("OrderBook reduces sizes on cancel and execute") {
 
   book->HandleEvent(Event{
       .event_type = EventType::kDelete,
+      .direction = Direction::kBuy,
       .id = 2,
       .size = 10,
       .price = 100,
-      .direction = Direction::kBuy,
   });
   CHECK_FALSE(OrderBookTest::Contains(*book, 2));
   CHECK(OrderBookTest::Head(*book, 100) == OrderBookTest::Tail(*book, 100));
@@ -124,20 +123,20 @@ TEST_CASE("OrderBook ignores events for unknown order ids") {
   for (auto type : {EventType::kCancel, EventType::KExecute, EventType::kDelete}) {
     book->HandleEvent(Event{
         .event_type = type,
+        .direction = Direction::kBuy,
         .id = 1,
         .size = 50,
         .price = 100,
-        .direction = Direction::kBuy,
     });
   }
   CHECK(OrderBookTest::Empty(*book));
 
   book->HandleEvent(Event{
       .event_type = EventType::kAdd,
+      .direction = Direction::kBuy,
       .id = 1,
       .size = 100,
       .price = 100,
-      .direction = Direction::kBuy,
   });
   CHECK(OrderBookTest::Contains(*book, 1));
 }
