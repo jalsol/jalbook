@@ -28,6 +28,11 @@ class Level {
     Tail() = order;
   }
 
+  void DeleteOrder(Order* order) {
+    order->prev->next = order->next;
+    order->next->prev = order->prev;
+  }
+
  private:
   Order sentinel_{};
 };

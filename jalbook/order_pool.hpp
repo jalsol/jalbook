@@ -17,7 +17,7 @@ class OrderPool {
     free_head_ = &orders_[0];
   }
 
-  [[nodiscard]] Order* allocate() noexcept {
+  [[nodiscard]] Order* Allocate() noexcept {
     if (free_head_ == nullptr) return nullptr;
 
     Order* ret = free_head_;
@@ -25,7 +25,7 @@ class OrderPool {
     return ret;
   }
 
-  void deallocate(Order* order) noexcept {
+  void Deallocate(Order* order) noexcept {
     order->next = free_head_;
     free_head_ = order;
   }

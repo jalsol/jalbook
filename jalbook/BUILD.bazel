@@ -5,6 +5,7 @@ cc_library(
     hdrs = glob(["*.hpp"]),
     visibility = ["//visibility:public"],
     deps = [
+        "@abseil-cpp//absl/container:flat_hash_map",
         "@abseil-cpp//absl/log:log",
         "@fast_cpp_csv_parser//:csv",
     ],

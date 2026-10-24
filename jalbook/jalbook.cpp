@@ -14,7 +14,6 @@
 #include "spsc_queue.hpp"
 #include "utils.hpp"
 
-// Abseil's --help only lists flags defined in <binary-name>.cpp (jalbook.cpp).
 ABSL_FLAG(std::string, input_path, "", "Input path");
 
 int main(int argc, char** argv) {
@@ -28,11 +27,7 @@ int main(int argc, char** argv) {
   }
 
   absl::InitializeLog();
-  // The stderr sink defaults to ERROR; keep logging every event as before.
   absl::SetStderrThreshold(absl::LogSeverityAtLeast::kInfo);
-
-  // TODO:
-  // - bind book processing to queue
 
   SPSCQueue<Event, 1LL << 16> queue;
   FeedHandler feed_handler{&queue, input_path};

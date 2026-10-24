@@ -33,3 +33,111 @@ TEST_CASE("OrderBook ignores the halt sentinel") {
   halt.event_type = EventType::kHalt;
   book->HandleEvent(halt);
 }
+
+struct OrderBookTest {
+  static bool Empty(const OrderBook& book) { return book.id_to_order_.empty(); }
+
+  static bool Contains(const OrderBook& book, std::uint64_t id) {
+    return book.id_to_order_.contains(id);
+  }
+
+  static std::uint64_t Size(const OrderBook& book, std::uint64_t id) {
+    return book.id_to_order_.at(id)->size;
+  }
+
+  static Order* At(OrderBook& book, std::uint64_t id) { return book.id_to_order_.at(id); }
+
+  static Order* Head(OrderBook& book, std::uint64_t price) { return book.levels_[price].Head(); }
+
+  static Order* Tail(OrderBook& book, std::uint64_t price) { return book.levels_[price].Tail(); }
+};
+
+TEST_CASE("OrderBook reduces sizes on cancel and execute") {
+  auto book = std::make_unique<OrderBook>();  // too big for the stack
+
+  auto submit = [&](std::uint64_t id, std::uint64_t size) {
+    book->HandleEvent(Event{
+        .event_type = EventType::kAdd,
+        .id = id,
+        .size = size,
+        .price = 100,
+        .direction = Direction::kBuy,
+    });
+  };
+  submit(1, 100);
+  submit(2, 10);  // Same level, so removal has to relink more than one order.
+  CHECK(OrderBookTest::Head(*book, 100) == OrderBookTest::At(*book, 1));
+  CHECK(OrderBookTest::Tail(*book, 100) == OrderBookTest::At(*book, 2));
+
+  book->HandleEvent(Event{
+      .event_type = EventType::KExecute,
+      .id = 1,
+      .size = 40,
+      .price = 100,
+      .direction = Direction::kBuy,
+  });
+  CHECK(OrderBookTest::Size(*book, 1) == 60);
+
+  book->HandleEvent(Event{
+      .event_type = EventType::kCancel,
+      .id = 1,
+      .size = 20,
+      .price = 100,
+      .direction = Direction::kBuy,
+  });
+  CHECK(OrderBookTest::Size(*book, 1) == 40);
+
+  book->HandleEvent(Event{
+      .event_type = EventType::kTrade,
+      .id = 1,
+      .size = 40,
+      .price = 100,
+      .direction = Direction::kBuy,
+  });
+  CHECK(OrderBookTest::Size(*book, 1) == 40);
+
+  book->HandleEvent(Event{
+      .event_type = EventType::KExecute,
+      .id = 1,
+      .size = 40,
+      .price = 100,
+      .direction = Direction::kBuy,
+  });
+  CHECK_FALSE(OrderBookTest::Contains(*book, 1));
+  CHECK(OrderBookTest::Head(*book, 100) == OrderBookTest::At(*book, 2));
+  CHECK(OrderBookTest::Tail(*book, 100) == OrderBookTest::At(*book, 2));
+
+  book->HandleEvent(Event{
+      .event_type = EventType::kDelete,
+      .id = 2,
+      .size = 10,
+      .price = 100,
+      .direction = Direction::kBuy,
+  });
+  CHECK_FALSE(OrderBookTest::Contains(*book, 2));
+  CHECK(OrderBookTest::Head(*book, 100) == OrderBookTest::Tail(*book, 100));
+}
+
+TEST_CASE("OrderBook ignores events for unknown order ids") {
+  auto book = std::make_unique<OrderBook>();  // too big for the stack
+
+  for (auto type : {EventType::kCancel, EventType::KExecute, EventType::kDelete}) {
+    book->HandleEvent(Event{
+        .event_type = type,
+        .id = 1,
+        .size = 50,
+        .price = 100,
+        .direction = Direction::kBuy,
+    });
+  }
+  CHECK(OrderBookTest::Empty(*book));
+
+  book->HandleEvent(Event{
+      .event_type = EventType::kAdd,
+      .id = 1,
+      .size = 100,
+      .price = 100,
+      .direction = Direction::kBuy,
+  });
+  CHECK(OrderBookTest::Contains(*book, 1));
+}

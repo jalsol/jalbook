@@ -33,8 +33,10 @@ jobs:
     container: gcc:16.2.0-trixie
     strategy:
       fail-fast: false
+      # UBSan is omitted here: it needs Clang (see .bazelrc); this is the GCC
+      # container.
       matrix:
-        config: [ci, asan, ubsan]
+        config: [ci, asan]
     steps:
       - uses: actions/checkout@v7
 

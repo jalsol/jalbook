@@ -9,7 +9,7 @@ enum class EventType {
   kCancel = 2,
   kDelete = 3,
   KExecute = 4,
-  KHidden = 5,
+  kHidden = 5,
   kTrade = 6,
   kHalt = 7,
 };
@@ -27,7 +27,8 @@ struct Event {
   Direction direction;
 
   bool IsBookRelevant() const {
-    return (event_type != EventType::KHidden) && (event_type != EventType::kHalt);
+    return (event_type != EventType::kHidden) && (event_type != EventType::kTrade) &&
+           (event_type != EventType::kHalt);
   }
 };
 

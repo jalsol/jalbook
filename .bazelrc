@@ -58,8 +58,8 @@ build:asan --copt=-fno-lto --copt=-fsanitize=address --copt=-fno-omit-frame-poin
 build:asan --linkopt=-fno-lto --linkopt=-fuse-ld=lld --linkopt=-fsanitize=address
 
 # bazel test --config=ubsan //...
+# Clang only: GCC 16 cannot compile Abseil's flat_hash_map internals with
+# -fsanitize=undefined (constexpr function-pointer comparison).
+build:ubsan --repo_env=CC=clang --repo_env=CXX=clang++
 build:ubsan --copt=-fno-lto --copt=-fsanitize=undefined --copt=-fno-sanitize-recover=all
 build:ubsan --linkopt=-fno-lto --linkopt=-fuse-ld=lld --linkopt=-fsanitize=undefined
-# GCC 16 UBSan trips a constexpr error in Abseil's hash internals; sanitize
-# project code only.
-build:ubsan --per_file_copt=external/abseil-cpp.*@-fno-sanitize=undefined
