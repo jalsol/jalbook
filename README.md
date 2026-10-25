@@ -13,9 +13,21 @@ GNU gold (see `.bazelrc`). Tests use Catch2.
 
 ## Benchmark
 
-The book thread times every add/cancel/delete/execute with `rdtscp` and prints
-HdrHistogram percentiles in nanoseconds when the feed ends. The TSC frequency and
-the two-`rdtscp` measurement overhead are calibrated at startup.
+- Intel Core i5 1135G7.
+- Physical cores 1 and 2 (a.k.a logical cores 1,2,5,6) isolated, nohz, rcu_nocbs; irq affinity to other cores.
+- C-state at max, governor at `performance`.
+- Measured with `rdtscp`, accommodated for overhead (similar to rigtorp/spartan).
+- Explicit hugepage (didn't help improve much so removed).
+
+```
+TSC: 2.419 GHz (0.413 ns/cycle); 29-cycle (12.0 ns) measurement overhead subtracted
+nanoseconds per OrderBook::HandleEvent (rdtscp; overhead subtracted)
+op            count       mean        p50        p90        p99      p99.9     p99.99        max
+add          329566       18.4       17.4       23.6       28.9       41.7      912.3     3964.5
+cancel         5602       20.7       19.8       24.4       28.9      122.4      246.8      288.9
+delete       300183       28.4       28.1       34.3       40.1       45.9      141.0      482.0
+execute       29798       28.1       27.3       35.1       42.6      122.4      332.3      498.9
+```
 
 ## Debugging
 
